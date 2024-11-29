@@ -13,7 +13,7 @@
     <invite-team inline-template>
         <div class="row">
             <div class="col-sm-12">
-                @include('dashboard.partials.errors')
+                @include('partials.errors')
                 <form name="UserForm" class="form-vertical" role="form" action="{{ cachet_route('dashboard.team.invite', [], 'post') }}" method="POST">
                     <input type="hidden" name="_token" value="{{ csrf_token() }}">
                     <fieldset>
@@ -34,7 +34,7 @@
                         <div class="btn-group">
                             <button type="submit" class="btn btn-success">{{ trans('forms.invite') }}</button>
                             <a class="btn btn-default" href="{{ cachet_route('dashboard.team') }}">{{ trans('forms.cancel') }}</a>
-                            <button type="button" @click="add" class="btn btn-primary">Add</button>
+                            <button type="button" @click="add" class="btn btn-primary">{{ trans('forms.add') }}</button>
                         </div>
                     </div>
                 </form>

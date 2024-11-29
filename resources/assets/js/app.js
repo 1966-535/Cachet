@@ -20,12 +20,23 @@ window.axios.defaults.headers.common = {
     'X-Requested-With': 'XMLHttpRequest'
 };
 
+/**
+ * Flatpickr.
+ */
+const Flatpickr = require('flatpickr');
+
+import Metric from './components/status-page/Metric.vue';
+import Dashboard from './components/dashboard/Dashboard.vue';
+import Setup from './components/Setup.vue';
+
 ((win, doc) => {
     /**
      * Next, we will create a fresh Vue application instance and attach it to
      * the page. Then, you may begin adding components to this application
      * or customize the JavaScript scaffolding to fit your unique needs.
      */
+
+    Vue.component('fetch-data', require('./components/FetchData'));
 
     new Vue({
         el: '#app',
@@ -41,12 +52,17 @@ window.axios.defaults.headers.common = {
                 }
             }
         },
+        mounted () {
+            Flatpickr('.flatpickr');
+
+            Flatpickr('.flatpickr-time', {
+                enableTime: true
+            });
+        },
         components: {
-            'setup': require('./components/Setup'),
-            'dashboard': require('./components/dashboard/Dashboard'),
-            'report-incident': require('./components/dashboard/ReportIncident'),
-            'invite-team': require('./components/dashboard/InviteTeam'),
-            'metric-chart': require('./components/status-page/Metric'),
+            'setup': Setup,
+            'dashboard': Dashboard,
+            'metric-chart': Metric,
         }
-    })
+    });
 })()

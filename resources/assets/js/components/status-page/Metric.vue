@@ -24,7 +24,7 @@
         </div>
         <div class="row">
             <div class="col-xs-12">
-                <canvas :id="metricId" height="160" width="600"></canvas>
+                <canvas :id="metricId" height="200" width="900"></canvas>
             </div>
         </div>
     </div>
@@ -32,17 +32,14 @@
 
 <script>
 const Chart = require('chart.js')
-const _ = require('lodash')
 
-// Configure Chart.js
-Chart.defaults.global.elements.point.hitRadius = 10
-Chart.defaults.global.responsiveAnimationDuration = 1000
-Chart.defaults.global.legend.display = false
-
-module.exports = {
-    props: [
-        'metric',
-    ],
+export default {
+    props: {
+        metric: Object,
+        theme: String,
+        themeLight: String,
+        themeDark: String,
+    },
     data () {
         return {
             canvas: null,
@@ -74,15 +71,15 @@ module.exports = {
             this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
 
             this.context.fillStyle = "#666"
-            this.context.font = '44px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"'
+            this.context.font = '20px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"'
 
-            const textString = "Loading data",
-                textWidth = this.context.measureText(textString).width
+            const textString = "Loading metrics..."
+            const textWidth = this.context.measureText(textString).width
 
             this.canvas.textBaseline = 'middle'
             this.canvas.textAlign = "center"
 
-            this.context.fillText(textString , (this.canvas.width / 2) - (textWidth / 2), 100)
+            this.context.fillText(textString, (this.canvas.width / 2) - (textWidth / 2), 100)
         }
     },
     methods: {
@@ -116,22 +113,45 @@ module.exports = {
             if (this.chart !== null) {
                 this.chart.destroy()
             }
+            //Used in tooltip callback where this.metric is not the same.
+            var metric = this.metric;
+            /*
+             * Datetimes are used as keys instead of just time in order to
+             * improve ordering of labels in "Last 12 hours", so we cut the
+             * labels.
+             * This cutting is done only if there is an hour in the string, so
+             * if the view by day is set it doesn't fail.
+             */
+            var data_keys = _.keys(this.data);
+            if (0 < data_keys.length && data_keys[0].length > 10) {
+                for (var i = 0; i < data_keys.length; i++) {
+                    data_keys[i] = data_keys[i].substr(11);
+                }
+            }
 
             this.chart = new Chart(this.context, {
                 type: 'line',
                 data: {
-                    labels: _.keys(this.data),
+                    labels: data_keys,
                     datasets: [{
                         data: _.values(this.data),
-                        // backgroundColor: "{{ $theme_metrics }}",
-                        // borderColor: "{{ color_darken($theme_metrics, -0.1) }}",
-                        // pointBackgroundColor: "{{ color_darken($theme_metrics, -0.1) }}",
-                        // pointBorderColor: "{{ color_darken($theme_metrics, -0.1) }}",
-                        // pointHoverBackgroundColor: "{{ color_darken($theme_metrics, -0.2) }}",
-                        // pointHoverBorderColor: "{{ color_darken($theme_metrics, -0.2) }}"
+                        backgroundColor: this.themeLight,
+                        borderColor: this.theme,
+                        pointBackgroundColor: this.theme,
+                        pointBorderColor: this.theme,
+                        pointHoverBackgroundColor: this.themeDark,
+                        pointHoverBorderColor: this.themeDark
                     }]
                 },
                 options: {
+                    elements: {
+                        point: {
+                            hitRadius: 5
+                        }
+                    },
+                    legend: {
+                        display: false
+                    },
                     scales: {
                         yAxes: [{
                             ticks: {
@@ -164,15 +184,14 @@ module.exports = {
                             }
                         }]
                     },
-                },
-                tooltips: {
-                    callbacks: {
-                        label: function(tooltipItem, data) {
-                            return tooltipItem.yLabel + ' ' + result.data.metric.suffix
+                    tooltips: {
+                        callbacks: {
+                            label: function(tooltipItem, data) {
+                                return tooltipItem.yLabel + ' ' + metric.suffix;
+                            }
                         }
                     }
-                }
-            })
+            }})
         }
     }
 }

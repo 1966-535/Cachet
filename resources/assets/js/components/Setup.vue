@@ -1,13 +1,12 @@
 <script>
-module.exports = {
-    props: [],
+export default {
     data () {
         return {
             env: {
                 cache_driver: null,
                 queue_driver: null,
                 session_driver: null,
-                mail_driver: null,
+                mail_driver: 'smtp',
             },
             mail: {
                 host: null,
@@ -19,8 +18,8 @@ module.exports = {
                 password: null,
 
                 requiresHost: true,
-                requiresUsername: true,
-                requiresPassword: true,
+                requiresUsername: false,
+                requiresPassword: false,
             },
             system: {
                 name: null,
@@ -40,6 +39,10 @@ module.exports = {
                 this.mail.requiresHost = false
                 this.mail.requiresUsername = true
                 this.mail.requiresPassword = true
+            } else if (driver === 'smtp') {
+                this.mail.requiresHost = true
+                this.mail.requiresUsername = false
+                this.mail.requiresPassword = false
             } else {
                 this.mail.requiresHost = true
                 this.mail.requiresUsername = true
